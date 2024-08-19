@@ -6,12 +6,11 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views import View
 from django.contrib.auth.decorators import login_required
 
-from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
-
+from .models import TechStack
+from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm, TechStackForm
 
 def home(request):
     return render(request, 'users/home.html')
-
 
 class RegisterView(View):
     form_class = RegisterForm
@@ -43,7 +42,6 @@ class RegisterView(View):
 
         return render(request, self.template_name, {'form': form})
 
-
 # Class based view that extends from the built in login view to add a remember me functionality
 class CustomLoginView(LoginView):
     form_class = LoginForm
@@ -61,7 +59,6 @@ class CustomLoginView(LoginView):
         # else browser session will be as long as the session cookie time "SESSION_COOKIE_AGE" defined in settings.py
         return super(CustomLoginView, self).form_valid(form)
 
-
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = 'users/password_reset.html'
     email_template_name = 'users/password_reset_email.html'
@@ -72,12 +69,10 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
                       "please make sure you've entered the address you registered with, and check your spam folder."
     success_url = reverse_lazy('users-home')
 
-
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
     template_name = 'users/change_password.html'
     success_message = "Successfully Changed Your Password"
     success_url = reverse_lazy('users-home')
-
 
 @login_required
 def profile(request):
@@ -95,3 +90,18 @@ def profile(request):
         profile_form = UpdateProfileForm(instance=request.user.profile)
 
     return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form})
+
+@login_required
+def select_tech_stack(request):
+    if request.method == 'POST':
+        form = TechStackForm(request.POST)
+        if form.is_valid():
+            language = form.cleaned_data['language']
+            # Save the selected language to the database
+            TechStack.objects.create(user=request.user, language=language)
+            messages.success(request, 'Tech stack added successfully.')
+            return redirect(to='select_tech_stack')  # Replace with your success view
+    else:
+        form = TechStackForm()
+    
+    return render(request, 'select_tech_stack.html', {'form': form})

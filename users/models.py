@@ -23,3 +23,10 @@ class Profile(models.Model):
             new_img = (100, 100)
             img.thumbnail(new_img)
             img.save(self.avatar.path)
+
+class TechStack(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    language = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.language}"
