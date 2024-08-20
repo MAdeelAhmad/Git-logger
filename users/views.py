@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views import View
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+import subprocess
 
 from .models import TechStack
 from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm, TechStackForm
@@ -97,8 +99,27 @@ def select_tech_stack(request):
         form = TechStackForm(request.POST)
         if form.is_valid():
             language = form.cleaned_data['language']
-            # Save the selected language to the database
-            TechStack.objects.create(user=request.user, language=language)
+            user=request.user
+            TechStack.objects.create(user=user, language=language)
+            github_auth = user.social_auth.get(provider='github')
+            token = github_auth.extra_data['access_token']
+            try:
+                # Run the bash script
+                result = subprocess.run(['users/tmp/github_scripts.sh', str(user), str(user.first_name), str(user.email), str(token), str(language)], capture_output=True, text=True, check=True)
+
+                # Optionally, you can handle the output
+                script_output = result.stdout
+                script_error = result.stderr
+
+                # You can log or process the output if needed
+                print(f"Script output: {script_output}")
+                if script_error:
+                    print(f"Script error: {script_error}")
+
+            except subprocess.CalledProcessError as e:
+                # Handle the error if the script fails
+                return JsonResponse({"error": "Failed to run the script", "details": str(e)}, status=500)
+            # run_bash_script(request.user, token, language)
             messages.success(request, 'Tech stack added successfully.')
             return redirect(to='select_tech_stack')  # Replace with your success view
     else:
