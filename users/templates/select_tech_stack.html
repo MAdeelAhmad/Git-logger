@@ -10,7 +10,7 @@
                             <h3 class="font-weight-light my-4 text-center">Select Your Tech Stack</h3>
                         </div>
                         <div class="card-body">
-                            <form method="post">
+                            <form id="techStackForm" method="post">
                                 {% csrf_token %}
                                 <div class="form-row">
                                     <div class="col-md-10 offset-md-1">
@@ -27,10 +27,30 @@
                                     </div>
                                 </div>
                             </form>
+
+                            <div id="loadingSpinner" class="text-center" style="display: none;">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <p>Please wait while background processes are running...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById('techStackForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            document.getElementById('techStackForm').style.display = 'none';
+            document.getElementById('loadingSpinner').style.display = 'block';
+            
+            this.submit();
+        });
+    </script>
 {% endblock content %}
