@@ -30,7 +30,7 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['50.10.2.34', '127.0.0.1', 'localhost', 'Adeel.pythonanywhere.com']
 
 
 # Application definition
