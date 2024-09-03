@@ -20,11 +20,9 @@ class RegisterView(View):
     template_name = 'users/register.html'
 
     def dispatch(self, request, *args, **kwargs):
-        # will redirect to the home page if a user tries to access the register page while logged in
         if request.user.is_authenticated:
             return redirect(to='/')
 
-        # else process dispatch as it otherwise normally would
         return super(RegisterView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -44,7 +42,6 @@ class RegisterView(View):
 
         return render(request, self.template_name, {'form': form})
 
-# Class based view that extends from the built in login view to add a remember me functionality
 class CustomLoginView(LoginView):
     form_class = LoginForm
 
@@ -52,13 +49,9 @@ class CustomLoginView(LoginView):
         remember_me = form.cleaned_data.get('remember_me')
 
         if not remember_me:
-            # set session expiry to 0 seconds. So it will automatically close the session after the browser is closed.
             self.request.session.set_expiry(0)
-
-            # Set session as modified to force data updates/cookie to be saved.
             self.request.session.modified = True
 
-        # else browser session will be as long as the session cookie time "SESSION_COOKIE_AGE" defined in settings.py
         return super(CustomLoginView, self).form_valid(form)
 
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
@@ -94,24 +87,21 @@ def select_tech_stack(request):
             github_auth = user.social_auth.get(provider='github')
             token = github_auth.extra_data['access_token']
             try:
-                # Run the bash script
-                result = subprocess.run(['users/tmp/github_scripts.sh', str(user), str(user.first_name), str(user.email), str(token), str(language)], capture_output=True, text=True, check=True)
+                first_name = user.first_name if user.first_name else user
+                result = subprocess.run(['users/tmp/github_scripts.sh', str(user), str(first_name), str(user.email), str(token), str(language)], capture_output=True, text=True, check=True)
 
-                # Optionally, you can handle the output
                 script_output = result.stdout
                 script_error = result.stderr
 
-                # You can log or process the output if needed
                 print(f"Script output: {script_output}")
                 if script_error:
                     print(f"Script error: {script_error}")
 
             except subprocess.CalledProcessError as e:
-                # Handle the error if the script fails
                 return JsonResponse({"error": "Failed to run the script", "details": str(e)}, status=500)
-            # run_bash_script(request.user, token, language)
+
             messages.success(request, 'Tech stack added successfully.')
-            return redirect(to='select_tech_stack')  # Replace with your success view
+            return redirect(to='select_tech_stack')
     else:
         form = TechStackForm()
     
