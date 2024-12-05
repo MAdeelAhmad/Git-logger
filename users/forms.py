@@ -86,3 +86,17 @@ class UpdateProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['avatar', 'bio']
+
+class TechStackForm(forms.Form):
+    LANGUAGES = [
+        ('python', 'Python'),
+        ('ruby', 'Ruby'),
+        ('javascript', 'JavaScript'),
+        ('java', 'Java'),
+        ('csharp', 'C#'),
+        ('go', 'Go'),
+        ('php', 'PHP'),
+        # Add more languages as needed
+    ]
+    
+    language = forms.ChoiceField(choices=LANGUAGES)
